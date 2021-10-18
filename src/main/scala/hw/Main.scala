@@ -1,18 +1,26 @@
 package hw
 
+import breeze.linalg.DenseVector
 import breeze.stats.regression.leastSquares
-import utils.Utils.{meanAbsoluteError, prepareData, readCsv, vectorToFile}
-
+import regressor.CustomSGD
+import utils.Utils._
 
 object Main {
   def main(args: Array[String]) {
-    val (trainData, testData) = readCsv("C:/Homeworks/hw-scala/data/Marketing_Data.csv")
+    val argList = args.toList
+    val config = parseArgs(argList)
+    val (trainData, testData) = readCsv(config.dataset_path)
     val (trainX, trainY) = prepareData(trainData)
     val (testX, testY) = prepareData(testData)
-    val model = leastSquares(trainX, trainY)
-    val predY = model(testX)
-    println(meanAbsoluteError(predY, testY))
-    val outputPath: String = "C:/Homeworks/hw-scala/data/result.txt"
-    vectorToFile(outputPath, predY)
+    val modelCustom = new CustomSGD(trainX.cols)
+    modelCustom.fit(trainX, trainY)
+    val predYCustom: DenseVector[Double] = modelCustom.predict(testX)
+    val modelBreeze = leastSquares(trainX, trainY)
+    val predYBreeze: DenseVector[Double] = modelBreeze(testX)
+    val maeCustom = meanAbsoluteError(predYCustom, testY)
+    val maeBreeze = meanAbsoluteError(predYBreeze, testY)
+    println(s"Custom SGD MAE: $maeCustom")
+    println(s"Breeze leastSquares MAE: $maeBreeze")
+    vectorToFile(config.output_path, predYCustom)
   }
 }

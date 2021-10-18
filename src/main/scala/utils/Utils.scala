@@ -3,7 +3,7 @@ package utils
 import breeze.linalg.{DenseMatrix, DenseVector, csvread}
 import breeze.numerics.abs
 import breeze.stats.mean
-
+import config.Config
 import java.io.{File, FileWriter}
 
 object Utils {
@@ -34,5 +34,9 @@ object Utils {
 
   def meanAbsoluteError(pred: DenseVector[Double], hold: DenseVector[Double]): Double = {
     mean(abs(pred - hold))
+  }
+
+  def parseArgs(args: List[String]): Config = {
+    Config(dataset_path = args.head, output_path = args(1))
   }
 }
